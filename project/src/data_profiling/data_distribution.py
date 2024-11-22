@@ -36,7 +36,17 @@ def save_boxplot(data, numeric, file_tag):
         print("There are no numeric variables.")
 
 
-def save_histogram(data, numeric, file_tag):
+def save_histogram(data, file_tag):
+
+    correlations = data.corr()  # Calcula correlações para variáveis numéricas
+    target_corr = correlations['CLASS'].sort_values(ascending=False)  # Corr com a variável-alvo  
+
+    threshold = 0.2
+    promising_variables = target_corr[target_corr.abs() > threshold].index
+    data_selected = data[promising_variables]
+
+    variables_types: dict[str, list] = get_variable_types(data_selected)
+    numeric: list[str] = variables_types["numeric"]
 
     if [] != numeric:
         
@@ -59,15 +69,15 @@ def save_histogram(data, numeric, file_tag):
                 xlabel=numeric[n],
                 ylabel="nr records",
             )
-            axs[i, j].hist(data[numeric[n]].dropna().values, "auto")
+            axs[i, j].hist(data_selected[numeric[n]].dropna().values, "auto")
             i, j = (i + 1, 0) if (n + 1) % cols == 0 else (i, j + 1)
         savefig(f"{DIR}/{file_tag}_single_histograms_numeric.png")
         
         i, j = 0, 0
         for n in range(len(numeric)):
-            histogram_with_distributions(axs[i, j], data[numeric[n]].dropna(), numeric[n])
+            histogram_with_distributions(axs[i, j], data_selected[numeric[n]].dropna(), numeric[n])
             i, j = (i + 1, 0) if (n + 1) % cols == 0 else (i, j + 1)
-        savefig(f"images/{file_tag}_histogram_numeric_distribution.png")
+        savefig(f"{DIR}/{file_tag}_histogram_numeric_distribution.png")
         show()
 
     else:
@@ -165,7 +175,7 @@ def histogram_with_distributions(ax: Axes, series: Series, var: str):
         ylabel="",
     )
 
-def differente_types(variables_types,data, file_tag):
+def different_types(variables_types,data, file_tag):
     
     symbolic: list[str] = variables_types["symbolic"] + variables_types["binary"]
 
@@ -210,10 +220,13 @@ def class_distribution(data,file_tag):
 def distribution_process(data, file_tag):
     variables_types: dict[str, list] = get_variable_types(data)
     numeric: list[str] = variables_types["numeric"]
-
-    save_boxplot(data, numeric, file_tag)
-    identify_outliers(data, numeric, file_tag)
-    # save_histogram(data, numeric, file_tag)
     
-    differente_types(variables_types,data, file_tag)
-    class_distribution(data, file_tag)
+    correlations = data.corr()  
+    target_corr = correlations['CLASS'].sort_values(ascending=False) 
+    
+    # save_boxplot(target_corr, numeric, file_tag)
+    # identify_outliers(data, numeric, file_tag)
+    save_histogram(data, file_tag)
+    
+    # different_types(variables_types,data, file_tag)
+    # class_distribution(data, file_tag)
