@@ -73,6 +73,7 @@ def save_histogram(data, file_tag):
             i, j = (i + 1, 0) if (n + 1) % cols == 0 else (i, j + 1)
         savefig(f"{DIR}/{file_tag}_single_histograms_numeric.png")
         
+        #BEST FIT        
         i, j = 0, 0
         for n in range(len(numeric)):
             histogram_with_distributions(axs[i, j], data_selected[numeric[n]].dropna(), numeric[n])
@@ -82,6 +83,35 @@ def save_histogram(data, file_tag):
 
     else:
         print("There are no numeric variables.")
+
+def compute_known_distributions(x_values: list) -> dict:
+    distributions = dict()
+    # Gaussian
+    mean, sigma = norm.fit(x_values)
+    distributions["Normal(%.1f,%.2f)" % (mean, sigma)] = norm.pdf(x_values, mean, sigma)
+    # Exponential
+    loc, scale = expon.fit(x_values)
+    distributions["Exp(%.2f)" % (1 / scale)] = expon.pdf(x_values, loc, scale)
+    # LogNorm
+    sigma, loc, scale = lognorm.fit(x_values)
+    distributions["LogNor(%.1f,%.2f)" % (log(scale), sigma)] = lognorm.pdf(
+        x_values, sigma, loc, scale
+    )
+    return distributions
+
+
+def histogram_with_distributions(ax: Axes, series: Series, var: str):
+    values: list = series.sort_values().to_list()
+    ax.hist(values, 20, density=True)
+    distributions: dict = compute_known_distributions(values)
+    plot_multiline_chart(
+        values,
+        distributions,
+        ax=ax,
+        title="Best fit for %s" % var,
+        xlabel=var,
+        ylabel=20000,
+    )
 
 def determine_outlier_thresholds_for_var(
     summary5: Series, std_based: bool = True, threshold: float = NR_STDEV
@@ -146,34 +176,6 @@ def identify_outliers(data, numeric, file_tag):
     else:
         print("There are no numeric variables.")
 
-def compute_known_distributions(x_values: list) -> dict:
-    distributions = dict()
-    # Gaussian
-    mean, sigma = norm.fit(x_values)
-    distributions["Normal(%.1f,%.2f)" % (mean, sigma)] = norm.pdf(x_values, mean, sigma)
-    # Exponential
-    loc, scale = expon.fit(x_values)
-    distributions["Exp(%.2f)" % (1 / scale)] = expon.pdf(x_values, loc, scale)
-    # LogNorm
-    sigma, loc, scale = lognorm.fit(x_values)
-    distributions["LogNor(%.1f,%.2f)" % (log(scale), sigma)] = lognorm.pdf(
-        x_values, sigma, loc, scale
-    )
-    return distributions
-
-
-def histogram_with_distributions(ax: Axes, series: Series, var: str):
-    values: list = series.sort_values().to_list()
-    ax.hist(values, 20, density=True)
-    distributions: dict = compute_known_distributions(values)
-    plot_multiline_chart(
-        values,
-        distributions,
-        ax=ax,
-        title="Best fit for %s" % var,
-        xlabel=var,
-        ylabel="",
-    )
 
 def different_types(variables_types,data, file_tag):
     

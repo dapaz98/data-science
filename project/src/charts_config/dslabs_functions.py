@@ -686,7 +686,7 @@ def read_train_test_from_files(
     test: DataFrame = read_csv(test_fn, index_col=None)
     tstY: array = test.pop(target).to_list()
     tstX: ndarray = test.values
-    return trnX, tstX, trnY, tstY, labels, train.columns.to_list()
+    return trnX, tstX, trnY, tstY, labels , train.columns.to_list()
 
 
 def plot_confusion_matrix(cnf_matrix: ndarray, classes_names: ndarray, ax: Axes = None) -> Axes:  # type: ignore

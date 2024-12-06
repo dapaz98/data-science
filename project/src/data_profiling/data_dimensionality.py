@@ -8,7 +8,6 @@ def analyze_records(data, file_tag):
         list(values.keys()), list(values.values()), title="Nr of records vs nr variables"
     )
     savefig(f"/home/dapaz98/Documents/university/data-science/project/docs/data_dimensionality/{file_tag}_records_variables.png")
-    show()
     print()
 
 def save_missing_values(data, file_tag):
@@ -28,7 +27,6 @@ def save_missing_values(data, file_tag):
         ylabel="nr missing values",
     )
     savefig(f"/home/dapaz98/Documents/university/data-science/project/docs/data_dimensionality/{file_tag}_mv.png")
-    show()
 
 def save_variables_type(data, file_tag):
     variable_types: dict[str, list] = get_variable_types(data)
@@ -43,7 +41,6 @@ def save_variables_type(data, file_tag):
         list(counts.keys()), list(counts.values()), title="Nr of variables per type"
     )
     savefig(f"/home/dapaz98/Documents/university/data-science/project/docs/data_dimensionality/{file_tag}_variable_types.png")
-    show()
 
 # TODO: Call the function to save the images to the process
 def dimensionality_process(data, file_tag):
